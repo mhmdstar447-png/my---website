@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>موقعي المتصل بـ Supabase</title>
+  <!-- استدعاء مكتبة Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="padding: 20px; font-family: sans-serif; text-align: center; background-color: #f5f5f5;">
+  <h1 style="color: #333;">🚀 مرحباً بك في موقعي</h1>
+  <button id="testBtn" style="padding: 12px 24px; font-size: 18px; background-color: #3ecf8e; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;">اختبر الاتصال بقاعدة البيانات</button>
+  <div id="result" style="margin-top: 20px; font-size: 16px; color: #555;"></div>
+
+  <script>
+    // تم وضع بياناتك هنا بدقة
+    const supabaseUrl = 'https://onddnenwcmorgphifysb.supabase.co';
+    const supabaseKey = 'sb_publishable_dKOGf3_BYEtJkeS6sMuW0A_zDqXn0f3';
+
+    // إنشاء اتصال مع سوبابيس
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // عند الضغط على الزر
+    document.getElementById('testBtn').addEventListener('click', async () => {
+      const resultBox = document.getElementById('result');
+      resultBox.innerText = '⏳ جاري الاتصال بقاعدة البيانات...';
+
+      // تنبيه مهم: لكي يعمل هذا، يجب أن يكون لديك جدول اسمه 'users' داخل Supabase
+      const { data, error } = await supabase.from('users').select('*');
+
+      if (error) {
+        resultBox.innerText = '❌ خطأ: ' + error.message;
+      } else {
+        resultBox.innerText = '✅ تم الاتصال بنجاح!';
+        if (data && data.length > 0) {
+          resultBox.innerText += '\nالبيانات الموجودة: ' + JSON.stringify(data);
+        } else {
+          resultBox.innerText += '\n(الجدول موجود لكنه فارغ حاليًا)';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

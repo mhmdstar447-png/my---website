@@ -13,17 +13,16 @@
     button:hover { opacity: 0.9; }
     .item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
     .item span { font-weight: bold; }
-    .loading { color: #666; text-align: center; margin-top: 15px; }
+    #errorBox { color: red; margin-top: 10px; text-align: center; display: none; }
   </style>
 </head>
 <body>
 <div class="container">
   <h2 style="text-align:center;">📋 حسبة ألكل</h2>
-  
   <input type="text" id="nameInput" placeholder="أدخل الاسم (مثلاً: محمد)">
   <input type="number" id="scoreInput" placeholder="أدخل الرقم (مثلاً: 10)">
   <button id="addBtn">➕ إضافة سجل</button>
-
+  <div id="errorBox"></div>
   <div id="listContainer">
     <div class="loading">جاري تحميل البيانات...</div>
   </div>
@@ -36,12 +35,16 @@
 
   async function loadData() {
     const container = document.getElementById('listContainer');
-    container.innerHTML = '<div class="loading">جاري التحميل...</div>';
+    const errorBox = document.getElementById('errorBox');
+    errorBox.style.display = 'none';
+    container.innerHTML = '<div class="loading">جاري تحميل البيانات...</div>';
     
     const { data, error } = await supabase.from('records').select('*').order('id', { ascending: false });
     
     if (error) {
-      container.innerHTML = `<div style="color:red; text-align:center;">خطأ: ${error.message}</div>`;
+      errorBox.style.display = 'block';
+      errorBox.innerText = '❗ خطأ في قاعدة البيانات: ' + error.message;
+      container.innerHTML = '';
     } else if (data.length === 0) {
       container.innerHTML = `<div style="text-align:center; color:#666;">لا توجد سجلات حالياً، أضف الأول!</div>`;
     } else {
@@ -54,6 +57,8 @@
   document.getElementById('addBtn').addEventListener('click', async () => {
     const name = document.getElementById('nameInput').value;
     const score = document.getElementById('scoreInput').value;
+    const errorBox = document.getElementById('errorBox');
+    errorBox.style.display = 'none';
 
     if (!name || !score) { alert('يرجى تعبئة الحقول'); return; }
 
@@ -63,7 +68,8 @@
     const { error } = await supabase.from('records').insert({ name: name, score: parseInt(score) });
 
     if (error) {
-      alert('فشل الإضافة: ' + error.message);
+      errorBox.style.display = 'block';
+      errorBox.innerText = '❗ خطأ في الإضافة: ' + error.message;
     } else {
       document.getElementById('nameInput').value = '';
       document.getElementById('scoreInput').value = '';
